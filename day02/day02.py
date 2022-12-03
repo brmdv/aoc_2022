@@ -51,13 +51,15 @@ def play_round(player_play: Play, opponent_play: Play) -> Outcome:
         return Outcome.LOST if (player_play - opponent_play) % 3 == 2 else Outcome.WON
 
 
-def round_score(player_play: Play, opponent_play: Play) -> int:
+def calculate_round_score(player_play: Play, opponent_play: Play) -> int:
     return player_play + play_round(player_play, opponent_play)
 
 
-def total_score(file: str) -> int:
+def calculate_total_score(file: str) -> int:
     with open(file, "r") as f:
-        total = sum(round_score(*parse_round_original(line)) for line in f.readlines())
+        total = sum(
+            calculate_round_score(*parse_round_original(line)) for line in f.readlines()
+        )
     return total
 
 
@@ -66,16 +68,18 @@ def parse_round_new(line: str) -> tuple[Play, Outcome]:
     return Play.parse(opponent), Outcome.parse(exp_outcome)
 
 
-def round_score_new(opponent_play: Play, expected_outcome: Outcome) -> int:
+def calculate_round_score_new(opponent_play: Play, expected_outcome: Outcome) -> int:
     for option in Play:
         if play_round(option, opponent_play) == expected_outcome:
             player_play = option
-    return round_score(player_play, opponent_play)
+    return calculate_round_score(player_play, opponent_play)
 
 
-def total_score_new(file: str):
+def calculate_total_score_new(file: str):
     with open(file, "r") as f:
-        total = sum(round_score_new(*parse_round_new(line)) for line in f.readlines())
+        total = sum(
+            calculate_round_score_new(*parse_round_new(line)) for line in f.readlines()
+        )
     return total
 
 
@@ -105,11 +109,11 @@ def test_round(player: Play, opponent: Play, expected: Outcome):
 )
 def test_score_one_round(line: str, expected: Outcome):
     p, o = parse_round_original(line)
-    assert round_score(p, o) == expected
+    assert calculate_round_score(p, o) == expected
 
 
 def test_example_1():
-    assert total_score("data/example.txt") == 15
+    assert calculate_total_score("data/example.txt") == 15
 
 
 @pytest.mark.parametrize(
@@ -117,16 +121,16 @@ def test_example_1():
     [("A Y", 4), ("B X", 1), ("C Z", 7)],
 )
 def test_new_round_notation_score(line: str, expected):
-    assert round_score_new(*parse_round_new(line)) == expected
+    assert calculate_round_score_new(*parse_round_new(line)) == expected
 
 
 def test_example2():
-    assert total_score_new("data/example.txt") == 12
+    assert calculate_total_score_new("data/example.txt") == 12
 
 
 # RESULTS
 if __name__ == "__main__":
-    result1 = total_score("data/input1.txt")
+    result1 = calculate_total_score("data/input1.txt")
     print(f"{result1 = }")
-    result2 = total_score_new("data/input1.txt")
+    result2 = calculate_total_score_new("data/input1.txt")
     print(f"{result2 = }")
